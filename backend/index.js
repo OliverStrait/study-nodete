@@ -12,14 +12,13 @@ const ENV = process.env
 
 
 
-
 function main() {
     const app = express()
 
     try {
         const demo = require("./demo-routes")
-        demo.demo(ENV.DEV, app)
-        console.log("✅ DEMO set is loaded")
+        demo.demo(true, app)
+        console.log("⚠️  DEMO set is loaded")
     }
     catch (e) {
         console.log("❌ NO demos", e)

@@ -1,7 +1,7 @@
 const error = require("./error_handling")
 
 
-const BASIC_ERROR = new error.HttpError(401, "Internal error that is caused by", "You are dirty")
+const BASIC_ERROR = new error.HttpError(400, "Internal error that is caused by", "User error")
 
 
 function demo(dev, app) {

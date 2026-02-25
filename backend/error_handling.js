@@ -1,9 +1,11 @@
+const ERR_NAME = "ErrorCarrier_"
 
 /** HttpError to construct invariant errors. 
  * It is used in pair with errorEndware
  * 
  */
 class HttpError {
+    name = ERR_NAME
     /**
      * 
      * @param {number} status http status code
@@ -28,48 +30,38 @@ class HttpError {
     }
 }
 
+
 /** Error handling  express endware
  * 
  * @param {boolean} DEV with flag server send and print more information about errors.
  */
 function error_endware(DEV = false) {
     if (DEV) {
-        /**
-         * 
-         * @param {Error, HttpError} err 
-         */
-        return (err, req, res, next) => {
-            let exception = Error.isError(err)
-            if (exception) {
-                console.log("unexpected error", err)
-                res.status(500)
-                next(err)
+
+        return function dev_error(err, req, res, next) {
+            if (err?.name == ERR_NAME) {
+                res.statusMessage = err.full
+                return res.status(err.status).json(err)
             }
-            else {
-                if (err?.full) {
-                    res.status(err.status)
-                    res.statusMessage = err.full
-                    res.json(err)
-                }
-            }
+            next(err)
             console.warn(`[ERR Response: ${res.statusCode}] @`, req.path)
         }
     }
     else {
-        /**
- * 
- * @param {Error, HttpError} err 
- */
-        return (err, req, res, next) => {
-            if (Error.isError(err)) {
-                console.warn("[PROD] INTERNAL ERROR", err)
-                res.status(500)
-            }
-            else if (err?.safe) {
-                res.status(err.status)
+
+        return function production_error(err, req, res, next) {
+
+            if (err?.name == ERR_NAME) {
                 res.statusMessage = err.safe
+                res.status(err.status)
             }
-            if (res.statusCode == 200) { res.status(500) }
+            else {
+                console.warn("[PRODUCTION] INTERNAL ERROR", err)
+                if (res.statusCode == 200) {
+                    res.status(500)
+                }
+            }
+
             res.end()
         }
     }
