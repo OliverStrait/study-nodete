@@ -1,8 +1,10 @@
+const NODE_ENV = process.env.NODE_ENV
 require("dotenv").config({
-    path: (process.env.NODE_ENV == "development") ? "dev.env" : null,
-    debug: (process.env.NODE_ENV == "development") ? true : false,
+    path: (NODE_ENV == "development") ? "dev.env" : ((NODE_ENV == "test") ? "test.env" : null),
+    debug: (NODE_ENV == "development" || NODE_ENV == "test") ? true : false,
     quiet: true,
 })
+
 const morgan = require("morgan")
 const mysql = require("mysql2")
 const express = require("express")
@@ -12,15 +14,12 @@ const error = require("./error_handling")
 const ENV = process.env
 
 
-
-
-
 function main() {
     const app = express()
 
     try {
         const demo = require("./demo-routes")
-        demo.demo(true, app)
+        demo.demo(ENV.DEMO, app)
         console.log("⚠️  DEMO set is loaded")
     }
     catch (e) {
@@ -39,10 +38,6 @@ function main() {
     }
 
     app.use(express.static('html'))
-
-
-
-
     app.use(error.error_endware(ENV.DEV))
 }
 
