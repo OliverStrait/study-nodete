@@ -1,14 +1,17 @@
 require("dotenv").config({
-    debug: true,
+    path: (process.env.NODE_ENV == "development") ? "dev.env" : null,
+    debug: (process.env.NODE_ENV == "development") ? true : false,
     quiet: true,
 })
 const morgan = require("morgan")
 const mysql = require("mysql2")
 const express = require("express")
-// const Kanban = require("./route_kanban")
+
 const error = require("./error_handling")
 
 const ENV = process.env
+
+
 
 
 

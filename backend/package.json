@@ -7,8 +7,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "Node --watch index.js"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
+    "test": "cross-env  NODE_ENV=test node --test"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
@@ -16,5 +17,8 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.0",
     "mysql2": "^3.18.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
   }
 }

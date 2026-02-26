@@ -1,6 +1,9 @@
 const ERR_NAME = "ErrorCarrier_"
 
-/** HttpError to construct invariant errors. 
+
+/** HttpError is used to construct invariant HTTP-errors and message pairs.
+ * Full message describe detailed version of error.
+ * Safe is for generic version of error without implementation details
  * It is used in pair with errorEndware
  * 
  */
@@ -21,12 +24,12 @@ class HttpError {
      *  @param {Error} err
      * @returns HttpError
      */
-    trace(err) {
-        let stack = (err ? err.stack : Error("httpErrInternal").stack).split("\n")
-        let new_err = Object.assign({}, this)
-        new_err.stack = err ? stack : stack.slice(2, stack.length - 1)
-        return new_err
 
+    full_msg() {
+        return { status: this.status, msg: this.full }
+    }
+    safe_msg() {
+        return { status: this.status, msg: this.safe }
     }
 }
 
@@ -36,36 +39,44 @@ class HttpError {
  * @param {boolean} DEV with flag server send and print more information about errors.
  */
 function error_endware(DEV = false) {
-    if (DEV) {
-
-        return function dev_error(err, req, res, next) {
-            if (err?.name == ERR_NAME) {
-                res.statusMessage = err.full
-                return res.status(err.status).json(err)
+    function parse_error(error, res) {
+        if (error?.name == ERR_NAME) {
+            let detail = DEV ? error.full_msg() : error.safe_msg()
+            return detail
+        }
+        else {
+            const { statusCode, statusMessage } = res
+            return {
+                status: (statusCode == 200) ? 500 : statusCode,
+                msg: statusMessage ?? "Internal Server Error",
+                stack: (error?.stack ?? "").split("\n")
             }
-            next(err)
-            console.warn(`[ERR Response: ${res.statusCode}] @`, req.path)
+        }
+    }
+    function set_basic(err, res) {
+        let detail = parse_error(err, res)
+        res.statusMessage = detail.msg
+        res.status(detail.status)
+        return detail
+    }
+    if (DEV) {
+        return function dev_error(err, req, res, next) {
+            let detail = set_basic(err, res)
+            console.info(`[ERR Response: ${detail.status}] @`, req.path)
+            res.json(detail).end()
         }
     }
     else {
 
         return function production_error(err, req, res, next) {
+            let detail = set_basic(err, res)
 
-            if (err?.name == ERR_NAME) {
-                res.statusMessage = err.safe
-                res.status(err.status)
+            if (detail.status >= 500 && detail.status < 600) {
+                console.warn("Unexpected", err)
             }
-            else {
-                console.warn("[PRODUCTION] INTERNAL ERROR", err)
-                if (res.statusCode == 200) {
-                    res.status(500)
-                }
-            }
-
             res.end()
         }
     }
 }
-
 
 module.exports = { error_endware, HttpError }
