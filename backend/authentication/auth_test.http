@@ -1,0 +1,17 @@
+
+POST  http://localhost:5152/api/auth/register HTTP/1.1
+content-type: application/json
+
+{"username": "Admirer", "password":"passwordi", "email":"eadmirern@example.com"}
+
+### LOGIN
+POST  http://localhost:5152/api/auth/login HTTP/1.1
+content-type: application/json
+
+{"username": "Admirer", "password":"passwordi"}
+
+### LOGOUT
+POST  http://localhost:5152/api/auth/logout HTTP/1.1
+content-type: application/json
+
+{"session_token": "cadb22b6-5a8c-4469-be51-f480e3156071"}

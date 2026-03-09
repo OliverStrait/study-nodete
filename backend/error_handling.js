@@ -31,6 +31,7 @@ class HttpError {
     safe_msg() {
         return { status: this.status, msg: this.safe }
     }
+
 }
 
 
@@ -49,7 +50,7 @@ function error_endware(DEV = false) {
             return {
                 status: (statusCode == 200) ? 500 : statusCode,
                 msg: statusMessage ?? "Internal Server Error",
-                stack: (error?.stack ?? "").split("\n")
+                stack: (error?.stack + (error?.cause?.stack ?? "") ?? "").split("\n")
             }
         }
     }
@@ -61,6 +62,7 @@ function error_endware(DEV = false) {
     }
     if (DEV) {
         return function dev_error(err, req, res, next) {
+            if (Error.isError(err)) { console.log(err) }
             let detail = set_basic(err, res)
             console.info(`[ERR Response: ${detail.status}] @`, req.path)
             res.json(detail).end()
