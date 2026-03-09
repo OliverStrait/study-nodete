@@ -7,5 +7,7 @@
 ## TODO 
 - [x] Structuring different development enviroment (dev, test, production)
 - [ ] Authentication
-    - [ ]JWT study
+    - [ ] JWT study
     - [ ] ServerToken study
+        - [x] Basic login / logout logic without authentication
+ 
